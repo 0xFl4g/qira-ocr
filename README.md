@@ -1,6 +1,6 @@
 # qira-ocr
 
-A hybrid multi-engine OCR toolkit for Arabic and English documents. Routes between [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) (fast, strong on printed text and tables) and [Surya](https://github.com/VikParuchuri/surya) (superior Arabic and handwriting recognition) behind a single unified interface. Supports PDFs, images, and batch processing with output as plain text, JSON, Markdown, or HTML.
+A hybrid multi-engine OCR toolkit for Arabic and English documents. Routes between [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) (fast, strong on printed text and tables), [QARI-OCR](https://huggingface.co/NAMAA-Space/Qari-OCR-v0.3-VL-2B-Instruct) (state-of-the-art Arabic with diacritics), and [Surya](https://github.com/VikParuchuri/surya) (Arabic and handwriting fallback) behind a single unified interface. Supports PDFs, images, and batch processing with output as plain text, JSON, Markdown, or HTML.
 
 Built as a university project at the University of Sheffield.
 
@@ -18,6 +18,7 @@ src/qira_ocr/
   engines/
     base.py            # OCREngine protocol
     paddle.py          # PaddleOCR wrapper
+    qari.py            # QARI-OCR wrapper (Arabic VLM)
     surya.py           # Surya OCR wrapper
 tests/                 # 73 tests covering all modules
 ```
@@ -30,6 +31,7 @@ Requires Python 3.12+. Install with [uv](https://docs.astral.sh/uv/):
 uv sync              # core OCR library
 uv sync --extra cli  # + command-line interface
 uv sync --extra api  # + REST API server
+uv sync --extra qari # + QARI-OCR engine (Arabic VLM, needs GPU)
 uv sync --extra all  # everything
 ```
 
@@ -47,7 +49,8 @@ result = ocr.read("invoice.pdf")
 print(result.to_text())
 
 # Force a specific engine
-result = ocr.read("arabic_note.jpg", engine="surya")
+result = ocr.read("arabic_note.jpg", engine="qari")   # best Arabic quality
+result = ocr.read("arabic_note.jpg", engine="surya")   # lighter Arabic fallback
 
 # Export as structured data
 for page in result.pages:
@@ -86,10 +89,11 @@ When `engine="auto"` (default), qira-ocr inspects the document to pick the best 
 | Condition | Engine | Why |
 |-----------|--------|-----|
 | PDF with text layer | Direct extraction | No OCR needed |
-| >30% Arabic characters detected | Surya | Better Arabic/handwriting support |
-| Everything else | PaddleOCR | Faster, strong on printed English + tables |
+| Low Paddle confidence (non-Latin) | QARI-OCR | State-of-the-art Arabic, 0.061 CER |
+| Low confidence, QARI not installed | Surya | Lighter Arabic/handwriting fallback |
+| Everything else | PaddleOCR | Fastest, strong on printed English + tables |
 
-Override with `engine="paddle"` or `engine="surya"`.
+Override with `engine="paddle"`, `engine="surya"`, or `engine="qari"`.
 
 ## License
 

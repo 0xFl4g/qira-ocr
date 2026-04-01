@@ -29,6 +29,7 @@ class EngineRouter:
     def __init__(self) -> None:
         self._paddle: PaddleEngine | None = None
         self._surya: SuryaEngine | None = None
+        self._qari: object | None = None
 
     def _get_paddle(self) -> PaddleEngine:
         if self._paddle is None:
@@ -40,6 +41,19 @@ class EngineRouter:
             self._surya = SuryaEngine()
         return self._surya
 
+    def _get_qari(self) -> OCREngine:
+        if self._qari is None:
+            from qira_ocr.engines.qari import QariEngine
+            self._qari = QariEngine()
+        return self._qari  # type: ignore[return-value]
+
+    def qari_available(self) -> bool:
+        try:
+            import qwen_vl_utils  # noqa: F401
+            return True
+        except ImportError:
+            return False
+
     def select(
         self,
         engine: str = "auto",
@@ -49,9 +63,11 @@ class EngineRouter:
             return self._get_paddle()
         elif engine == "surya":
             return self._get_surya()
+        elif engine == "qari":
+            return self._get_qari()
         elif engine == "auto":
             if text_hint and detect_arabic_ratio(text_hint) >= ARABIC_THRESHOLD:
-                return self._get_surya()
+                return self._get_qari() if self.qari_available() else self._get_surya()
             return self._get_paddle()
         else:
-            raise ValueError(f"Unknown engine: {engine!r}. Use 'auto', 'paddle', or 'surya'.")
+            raise ValueError(f"Unknown engine: {engine!r}. Use 'auto', 'paddle', 'surya', or 'qari'.")

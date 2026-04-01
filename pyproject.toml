@@ -18,7 +18,8 @@ dependencies = [
 [project.optional-dependencies]
 cli = ["click>=8.1"]
 api = ["fastapi>=0.115", "uvicorn>=0.34", "python-multipart>=0.0.20"]
-all = ["qira-ocr[cli,api]"]
+qari = ["qwen-vl-utils>=0.0.8", "accelerate>=0.26.0", "torchvision"]
+all = ["qira-ocr[cli,api,qari]"]
 
 [project.scripts]
 qira-ocr = "qira_ocr.cli:main"

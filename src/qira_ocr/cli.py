@@ -16,7 +16,7 @@ def main() -> None:
 
 @main.command()
 @click.argument("source", type=click.Path(exists=True))
-@click.option("--engine", default="auto", type=click.Choice(["auto", "paddle", "surya"]), help="OCR engine to use.")
+@click.option("--engine", default="auto", type=click.Choice(["auto", "paddle", "surya", "qari"]), help="OCR engine to use.")
 @click.option("--format", "fmt", default="text", type=click.Choice(["text", "markdown", "html", "json"]), help="Output format.")
 @click.option("--pages", default=None, help="Page range for PDFs (e.g. '1-3').")
 @click.option("--output", "-o", default=None, type=click.Path(), help="Output file path. Prints to stdout if not set.")

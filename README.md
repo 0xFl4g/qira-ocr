@@ -1,0 +1,96 @@
+# qira-ocr
+
+A hybrid multi-engine OCR toolkit for Arabic and English documents. Routes between [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) (fast, strong on printed text and tables) and [Surya](https://github.com/VikParuchuri/surya) (superior Arabic and handwriting recognition) behind a single unified interface. Supports PDFs, images, and batch processing with output as plain text, JSON, Markdown, or HTML.
+
+Built as a university project at the University of Sheffield.
+
+## Project Structure
+
+```
+src/qira_ocr/
+  __init__.py          # Public OCR class — single entry point
+  loader.py            # PDF text extraction, rasterization, image loading
+  router.py            # Automatic engine selection via Arabic script detection
+  result.py            # Structured result model (Page > Block > Line > Word)
+  structure.py         # Table/layout analysis using PPStructure
+  cli.py               # Click CLI (qira-ocr scan ...)
+  api.py               # FastAPI REST API (/ocr, /health)
+  engines/
+    base.py            # OCREngine protocol
+    paddle.py          # PaddleOCR wrapper
+    surya.py           # Surya OCR wrapper
+tests/                 # 73 tests covering all modules
+```
+
+## Installation
+
+Requires Python 3.12+. Install with [uv](https://docs.astral.sh/uv/):
+
+```bash
+uv sync              # core OCR library
+uv sync --extra cli  # + command-line interface
+uv sync --extra api  # + REST API server
+uv sync --extra all  # everything
+```
+
+## Usage
+
+### Python
+
+```python
+from qira_ocr import OCR
+
+ocr = OCR()
+
+# Basic — auto-detects engine, extracts text from PDF text layers directly
+result = ocr.read("invoice.pdf")
+print(result.to_text())
+
+# Force a specific engine
+result = ocr.read("arabic_note.jpg", engine="surya")
+
+# Export as structured data
+for page in result.pages:
+    for block in page.blocks:
+        print(block.text, block.bbox, block.confidence)
+
+# Other export formats
+result.to_dict()      # nested dict with bounding boxes + confidence scores
+result.to_markdown()  # markdown with table formatting
+result.to_html()      # html with table formatting
+```
+
+### CLI
+
+```bash
+qira-ocr scan document.pdf
+qira-ocr scan photo.jpg --engine surya --format markdown
+qira-ocr scan ./documents/ --output ./results/ --format json
+```
+
+### REST API
+
+```bash
+uvicorn qira_ocr.api:app
+```
+
+```
+POST /ocr    file upload, optional engine/format params
+GET  /health engine availability status
+```
+
+## Engine Routing
+
+When `engine="auto"` (default), qira-ocr inspects the document to pick the best engine:
+
+| Condition | Engine | Why |
+|-----------|--------|-----|
+| PDF with text layer | Direct extraction | No OCR needed |
+| >30% Arabic characters detected | Surya | Better Arabic/handwriting support |
+| Everything else | PaddleOCR | Faster, strong on printed English + tables |
+
+Override with `engine="paddle"` or `engine="surya"`.
+
+## License
+
+[MIT](LICENSE)

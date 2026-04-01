@@ -1,0 +1,42 @@
+[project]
+name = "qira-ocr"
+version = "0.1.0"
+description = "Hybrid multi-engine OCR for Arabic and English documents"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+dependencies = [
+    "paddleocr>=2.9",
+    "paddlepaddle>=3.0",
+    "paddlex[ocr]",
+    "surya-ocr>=0.8",
+    "pymupdf>=1.25",
+    "Pillow>=11.0",
+    "transformers>=4.45,<5",
+]
+
+[project.optional-dependencies]
+cli = ["click>=8.1"]
+api = ["fastapi>=0.115", "uvicorn>=0.34", "python-multipart>=0.0.20"]
+all = ["qira-ocr[cli,api]"]
+
+[project.scripts]
+qira-ocr = "qira_ocr.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qira_ocr"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = ["pytest>=9"]
+
+[tool.uv]
+override-dependencies = [
+    "pillow>=10.2.0",
+]

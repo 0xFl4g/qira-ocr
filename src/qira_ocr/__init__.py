@@ -33,11 +33,17 @@ class OCR:
             page = Page(blocks=[block], width=0, height=0)
             return OCRResult(pages=[page])
 
+        # Auto-detect: probe first page with Paddle (fast), switch to Surya
+        # if confidence is low — indicates non-Latin script like Arabic
+        if engine == "auto" and doc.pages:
+            probe = self._router.select(engine="paddle").recognize(doc.pages[0])
+            if probe.pages and probe.pages[0].confidence < 0.45:
+                engine = "surya"
+
         # OCR each page image
         all_pages: list[Page] = []
         for page_image in doc.pages:
-            text_hint = None
-            ocr_engine = self._router.select(engine=engine, text_hint=text_hint)
+            ocr_engine = self._router.select(engine=engine)
             result = ocr_engine.recognize(page_image)
             all_pages.extend(result.pages)
 

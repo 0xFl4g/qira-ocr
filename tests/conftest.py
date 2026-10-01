@@ -1,8 +1,7 @@
 from pathlib import Path
 
 import pytest
-from PIL import Image, ImageDraw, ImageFont
-
+from PIL import Image, ImageDraw
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 

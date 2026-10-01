@@ -1,6 +1,6 @@
 import pytest
 
-from qira_ocr.result import BBox, Word, Line, Block, Page, OCRResult
+from qira_ocr.result import BBox, Block, Line, OCRResult, Page, Word
 
 
 class TestBBox:
@@ -57,11 +57,21 @@ class TestBlock:
 class TestPage:
     def test_text_joins_blocks(self):
         block1 = Block(
-            lines=[Line(words=[Word("first", BBox(0, 0, 50, 20), 0.9)], bbox=BBox(0, 0, 50, 20))],
+            lines=[
+                Line(
+                    words=[Word("first", BBox(0, 0, 50, 20), 0.9)],
+                    bbox=BBox(0, 0, 50, 20),
+                )
+            ],
             bbox=BBox(0, 0, 50, 20),
         )
         block2 = Block(
-            lines=[Line(words=[Word("second", BBox(0, 50, 50, 70), 0.9)], bbox=BBox(0, 50, 50, 70))],
+            lines=[
+                Line(
+                    words=[Word("second", BBox(0, 50, 50, 70), 0.9)],
+                    bbox=BBox(0, 50, 50, 70),
+                )
+            ],
             bbox=BBox(0, 50, 50, 70),
         )
         page = Page(blocks=[block1, block2], width=400, height=300)

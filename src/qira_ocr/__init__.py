@@ -7,10 +7,10 @@ from pathlib import Path
 from PIL import Image
 
 from qira_ocr.loader import DocumentLoader
-from qira_ocr.result import OCRResult, BBox, Block, Line, Page, Word
+from qira_ocr.result import BBox, Block, Line, OCRResult, Page, Word
 from qira_ocr.router import EngineRouter
 
-__all__ = ["OCR", "OCRResult", "BBox", "Block", "Line", "Page", "Word"]
+__all__ = ["OCR", "BBox", "Block", "Line", "OCRResult", "Page", "Word"]
 
 
 class OCR:

@@ -1,5 +1,4 @@
 import fitz
-import pytest
 from PIL import Image
 
 from qira_ocr import OCR

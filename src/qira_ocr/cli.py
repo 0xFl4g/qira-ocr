@@ -16,11 +16,30 @@ def main() -> None:
 
 @main.command()
 @click.argument("source", type=click.Path(exists=True))
-@click.option("--engine", default="auto", type=click.Choice(["auto", "paddle", "surya", "qari"]), help="OCR engine to use.")
-@click.option("--format", "fmt", default="text", type=click.Choice(["text", "markdown", "html", "json"]), help="Output format.")
+@click.option(
+    "--engine",
+    default="auto",
+    type=click.Choice(["auto", "paddle", "surya", "qari"]),
+    help="OCR engine to use.",
+)
+@click.option(
+    "--format",
+    "fmt",
+    default="text",
+    type=click.Choice(["text", "markdown", "html", "json"]),
+    help="Output format.",
+)
 @click.option("--pages", default=None, help="Page range for PDFs (e.g. '1-3').")
-@click.option("--output", "-o", default=None, type=click.Path(), help="Output file path. Prints to stdout if not set.")
-def scan(source: str, engine: str, fmt: str, pages: str | None, output: str | None) -> None:
+@click.option(
+    "--output",
+    "-o",
+    default=None,
+    type=click.Path(),
+    help="Output file path. Prints to stdout if not set.",
+)
+def scan(
+    source: str, engine: str, fmt: str, pages: str | None, output: str | None
+) -> None:
     """Scan a file or directory for text."""
     source_path = Path(source)
 
@@ -30,7 +49,9 @@ def scan(source: str, engine: str, fmt: str, pages: str | None, output: str | No
         _scan_file(source_path, engine, fmt, pages, output)
 
 
-def _scan_file(path: Path, engine: str, fmt: str, pages: str | None, output: str | None) -> None:
+def _scan_file(
+    path: Path, engine: str, fmt: str, pages: str | None, output: str | None
+) -> None:
     ocr = OCR()
     result = ocr.read(path, engine=engine, pages=pages)
 
@@ -51,7 +72,9 @@ def _scan_file(path: Path, engine: str, fmt: str, pages: str | None, output: str
         click.echo(text)
 
 
-def _scan_directory(dir_path: Path, engine: str, fmt: str, pages: str | None, output: str | None) -> None:
+def _scan_directory(
+    dir_path: Path, engine: str, fmt: str, pages: str | None, output: str | None
+) -> None:
     extensions = {".png", ".jpg", ".jpeg", ".tiff", ".tif", ".bmp", ".webp", ".pdf"}
     files = sorted(f for f in dir_path.iterdir() if f.suffix.lower() in extensions)
 
@@ -66,7 +89,11 @@ def _scan_directory(dir_path: Path, engine: str, fmt: str, pages: str | None, ou
     ext_map = {"text": ".txt", "markdown": ".md", "html": ".html", "json": ".json"}
 
     for file in files:
-        out_path = str(output_dir / (file.stem + ext_map.get(fmt, ".txt"))) if output_dir else None
+        out_path = (
+            str(output_dir / (file.stem + ext_map.get(fmt, ".txt")))
+            if output_dir
+            else None
+        )
         _scan_file(file, engine, fmt, pages, out_path)
         if not out_path:
             click.echo("---")

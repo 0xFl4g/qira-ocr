@@ -49,8 +49,8 @@ result = ocr.read("invoice.pdf")
 print(result.to_text())
 
 # Force a specific engine
-result = ocr.read("arabic_note.jpg", engine="qari")   # best Arabic quality
-result = ocr.read("arabic_note.jpg", engine="surya")   # lighter Arabic fallback
+result = ocr.read("arabic_note.jpg", engine="qari")  # best Arabic quality
+result = ocr.read("arabic_note.jpg", engine="surya")  # lighter Arabic fallback
 
 # Export as structured data
 for page in result.pages:
@@ -58,9 +58,9 @@ for page in result.pages:
         print(block.text, block.bbox, block.confidence)
 
 # Other export formats
-result.to_dict()      # nested dict with bounding boxes + confidence scores
+result.to_dict()  # nested dict with bounding boxes + confidence scores
 result.to_markdown()  # markdown with table formatting
-result.to_html()      # html with table formatting
+result.to_html()  # html with table formatting
 ```
 
 ### CLI

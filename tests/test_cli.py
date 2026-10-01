@@ -35,6 +35,7 @@ class TestCLIScan:
         result = runner.invoke(main, ["scan", str(text_pdf), "--format", "json"])
         assert result.exit_code == 0
         import json
+
         data = json.loads(result.output)
         assert "pages" in data
 
@@ -58,7 +59,10 @@ class TestCLIBatchScan:
     @pytest.fixture
     def pdf_dir(self, tmp_path):
         """Create a directory with two text-layer PDFs."""
-        for name, text in [("alpha.pdf", "Alpha document text"), ("beta.pdf", "Beta document text")]:
+        for name, text in [
+            ("alpha.pdf", "Alpha document text"),
+            ("beta.pdf", "Beta document text"),
+        ]:
             path = tmp_path / name
             doc = fitz.open()
             page = doc.new_page()
@@ -75,7 +79,9 @@ class TestCLIBatchScan:
 
     def test_scan_directory_with_output_dir(self, runner, pdf_dir, tmp_path):
         out_dir = tmp_path / "out"
-        result = runner.invoke(main, ["scan", str(pdf_dir), "--output", str(out_dir), "--format", "text"])
+        result = runner.invoke(
+            main, ["scan", str(pdf_dir), "--output", str(out_dir), "--format", "text"]
+        )
         assert result.exit_code == 0
         assert out_dir.exists()
         alpha_out = out_dir / "alpha.txt"

@@ -20,7 +20,7 @@ class QariEngine:
     def _load(self) -> None:
         if self._model is not None:
             return
-        from transformers import Qwen2VLForConditionalGeneration, AutoProcessor
+        from transformers import AutoProcessor, Qwen2VLForConditionalGeneration
 
         model_name = "NAMAA-Space/Qari-OCR-v0.3-VL-2B-Instruct"
         import torch

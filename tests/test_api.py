@@ -34,7 +34,9 @@ class TestHealthEndpoint:
 class TestOCREndpoint:
     def test_ocr_pdf(self, client, text_pdf):
         with open(text_pdf, "rb") as f:
-            response = client.post("/ocr", files={"file": ("test.pdf", f, "application/pdf")})
+            response = client.post(
+                "/ocr", files={"file": ("test.pdf", f, "application/pdf")}
+            )
         assert response.status_code == 200
         data = response.json()
         assert "pages" in data

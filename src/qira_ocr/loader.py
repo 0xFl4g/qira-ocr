@@ -6,7 +6,6 @@ from pathlib import Path
 import fitz
 from PIL import Image
 
-
 SUPPORTED_IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".tiff", ".tif", ".bmp", ".webp"}
 
 
@@ -44,6 +43,7 @@ class DocumentLoader:
 
         if isinstance(source, bytes):
             import io
+
             img = Image.open(io.BytesIO(source))
             return Document(pages=[img])
 

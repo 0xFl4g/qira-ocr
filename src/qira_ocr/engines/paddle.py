@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import numpy as np
-from PIL import Image
 from paddleocr import PaddleOCR
+from PIL import Image
 
 from qira_ocr.result import BBox, Block, Line, OCRResult, Page, Word
 

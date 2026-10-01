@@ -44,7 +44,9 @@ class TestDocumentFromPDF:
         img.save(str(path.with_suffix(".png")))
         doc = fitz.open()
         page = doc.new_page(width=612, height=792)
-        page.insert_image(fitz.Rect(0, 0, 612, 792), filename=str(path.with_suffix(".png")))
+        page.insert_image(
+            fitz.Rect(0, 0, 612, 792), filename=str(path.with_suffix(".png"))
+        )
         doc.save(str(path))
         doc.close()
         return path

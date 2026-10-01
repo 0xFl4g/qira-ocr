@@ -18,7 +18,12 @@ def detect_arabic_ratio(text: str) -> float:
     for char in text:
         if unicodedata.category(char).startswith("L"):
             alpha_count += 1
-            if "\u0600" <= char <= "\u06ff" or "\u0750" <= char <= "\u077f" or "\ufb50" <= char <= "\ufdff" or "\ufe70" <= char <= "\ufeff":
+            if (
+                "\u0600" <= char <= "\u06ff"
+                or "\u0750" <= char <= "\u077f"
+                or "\ufb50" <= char <= "\ufdff"
+                or "\ufe70" <= char <= "\ufeff"
+            ):
                 arabic_count += 1
     if alpha_count == 0:
         return 0.0
@@ -44,12 +49,14 @@ class EngineRouter:
     def _get_qari(self) -> OCREngine:
         if self._qari is None:
             from qira_ocr.engines.qari import QariEngine
+
             self._qari = QariEngine()
         return self._qari  # type: ignore[return-value]
 
     def qari_available(self) -> bool:
         try:
             import qwen_vl_utils  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -70,4 +77,6 @@ class EngineRouter:
                 return self._get_qari() if self.qari_available() else self._get_surya()
             return self._get_paddle()
         else:
-            raise ValueError(f"Unknown engine: {engine!r}. Use 'auto', 'paddle', 'surya', or 'qari'.")
+            raise ValueError(
+                f"Unknown engine: {engine!r}. Use 'auto', 'paddle', 'surya', or 'qari'."
+            )

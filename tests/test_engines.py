@@ -3,9 +3,9 @@ from typing import runtime_checkable
 from PIL import Image
 
 from qira_ocr.engines.base import OCREngine
-from qira_ocr.result import BBox, Block, Line, OCRResult, Page, Word
 from qira_ocr.engines.paddle import PaddleEngine
 from qira_ocr.engines.surya import SuryaEngine
+from qira_ocr.result import BBox, Block, Line, OCRResult, Page, Word
 
 
 class TestOCREngineProtocol:
@@ -45,7 +45,9 @@ class TestPaddleEngine:
         result = engine.recognize(img)
         text = result.to_text().lower()
         # The image has "Hello World" drawn on it
-        assert "hello" in text or len(text) > 0  # OCR may not be perfect on synthetic images
+        assert (
+            "hello" in text or len(text) > 0
+        )  # OCR may not be perfect on synthetic images
 
 
 class TestSuryaEngine:
@@ -66,4 +68,6 @@ class TestSuryaEngine:
         result = engine.recognize(img)
         assert isinstance(result, OCRResult)
         text = result.to_text()
-        assert len(text) > 0 or len(result.pages[0].blocks) >= 0  # OCR on synthetic may vary
+        assert (
+            len(text) > 0 or len(result.pages[0].blocks) >= 0
+        )  # OCR on synthetic may vary

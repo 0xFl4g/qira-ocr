@@ -3,8 +3,8 @@ from __future__ import annotations
 import re
 
 import numpy as np
-from PIL import Image
 from paddleocr import PPStructureV3
+from PIL import Image
 
 from qira_ocr.result import BBox, Block, Line, OCRResult, Page, Word
 
@@ -35,7 +35,9 @@ class StructureAnalyzer:
         raw = results[0]
 
         # Extract the parsing result list from the result object
-        parsing_res_list = raw.get("parsing_res_list", []) if hasattr(raw, "get") else []
+        parsing_res_list = (
+            raw.get("parsing_res_list", []) if hasattr(raw, "get") else []
+        )
 
         if not parsing_res_list:
             page = Page(blocks=[], width=image.width, height=image.height)

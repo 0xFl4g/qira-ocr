@@ -35,9 +35,12 @@ packages = ["src/qira_ocr"]
 testpaths = ["tests"]
 
 [dependency-groups]
-dev = ["pytest>=9"]
+dev = ["pytest>=9", "ruff>=0.15"]
 
 [tool.uv]
 override-dependencies = [
     "pillow>=10.2.0",
 ]
+
+[tool.ruff.lint]
+ignore = ["B008"]  # FastAPI File()/Form() defaults

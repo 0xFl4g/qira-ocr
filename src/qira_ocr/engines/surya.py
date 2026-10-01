@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from PIL import Image
-from surya.recognition import RecognitionPredictor, FoundationPredictor
-from surya.detection import DetectionPredictor
 from surya.common.surya.schema import TaskNames
+from surya.detection import DetectionPredictor
+from surya.recognition import FoundationPredictor, RecognitionPredictor
 
 from qira_ocr.result import BBox, Block, Line, OCRResult, Page, Word
 

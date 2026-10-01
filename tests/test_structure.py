@@ -1,4 +1,3 @@
-import pytest
 from PIL import Image
 
 from qira_ocr.structure import StructureAnalyzer, _html_table_to_markdown
@@ -10,6 +9,7 @@ class TestStructureAnalyzer:
         img = Image.open(sample_image)
         result = analyzer.analyze(img)
         from qira_ocr.result import OCRResult
+
         assert isinstance(result, OCRResult)
 
     def test_analyze_empty_image(self):
@@ -17,6 +17,7 @@ class TestStructureAnalyzer:
         img = Image.new("RGB", (100, 100), color="white")
         result = analyzer.analyze(img)
         from qira_ocr.result import OCRResult
+
         assert isinstance(result, OCRResult)
 
 
@@ -25,7 +26,9 @@ class TestHtmlTableToMarkdown:
         assert _html_table_to_markdown("") == ""
 
     def test_simple_2x2_table(self):
-        html = "<table><tr><td>A</td><td>B</td></tr><tr><td>C</td><td>D</td></tr></table>"
+        html = (
+            "<table><tr><td>A</td><td>B</td></tr><tr><td>C</td><td>D</td></tr></table>"
+        )
         result = _html_table_to_markdown(html)
         lines = result.splitlines()
         assert lines[0] == "| A | B |"

@@ -2832,7 +2832,7 @@ requires-dist = [
     { name = "python-multipart", marker = "extra == 'api'", specifier = ">=0.0.20" },
     { name = "qira-ocr", extras = ["cli", "api", "qari"], marker = "extra == 'all'" },
     { name = "qwen-vl-utils", marker = "extra == 'qari'", specifier = ">=0.0.8" },
-    { name = "surya-ocr", specifier = ">=0.20" },
+    { name = "surya-ocr", specifier = ">=0.20,<0.23" },
     { name = "torchvision", marker = "extra == 'qari'" },
     { name = "transformers", specifier = ">=5" },
     { name = "uvicorn", marker = "extra == 'api'", specifier = ">=0.34" },

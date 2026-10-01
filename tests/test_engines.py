@@ -80,6 +80,38 @@ class TestSuryaEngine:
         assert block.bbox == BBox(1, 2, 30, 20)
         assert block.confidence == 0.9
 
+    @staticmethod
+    def _engine_returning(*blocks):
+        engine = SuryaEngine()
+        engine._recognition_predictor = lambda images: [
+            PageOCRResult(blocks=list(blocks), image_bbox=[0, 0, 100, 50])
+        ]
+        return engine
+
+    def test_recognize_raises_when_all_blocks_error(self):
+        failed = BlockOCRResult(
+            polygon=[0, 0, 50, 20], label="Text", reading_order=0, error=True
+        )
+        picture = BlockOCRResult(
+            polygon=[0, 25, 50, 50], label="Picture", reading_order=1, skipped=True
+        )
+        engine = self._engine_returning(failed, picture)
+        with pytest.raises(RuntimeError):
+            engine.recognize(Image.new("RGB", (100, 50)))
+
+    def test_recognize_warns_on_partial_errors(self, caplog):
+        ok = BlockOCRResult(
+            polygon=[0, 0, 50, 20], label="Text", reading_order=0, html="<p>kept</p>"
+        )
+        failed = BlockOCRResult(
+            polygon=[0, 25, 50, 50], label="Text", reading_order=1, error=True
+        )
+        engine = self._engine_returning(ok, failed)
+        with caplog.at_level("WARNING"):
+            result = engine.recognize(Image.new("RGB", (100, 50)))
+        assert result.to_text() == "kept"
+        assert any(r.levelname == "WARNING" for r in caplog.records)
+
     @pytest.mark.requires_ocr_server
     def test_recognize_returns_ocr_result(self, sample_image):
         engine = SuryaEngine()

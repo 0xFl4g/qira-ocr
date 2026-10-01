@@ -9,7 +9,7 @@ dependencies = [
     "paddleocr>=2.9",
     "paddlepaddle>=3.0",
     "paddlex[ocr]",
-    "surya-ocr>=0.20",
+    "surya-ocr>=0.20,<0.23",
     "pymupdf>=1.25",
     "Pillow>=11.0",
     "transformers>=5",
@@ -45,5 +45,5 @@ override-dependencies = [
     "pillow>=10.2.0",
 ]
 
-[tool.ruff.lint]
-ignore = ["B008"]  # FastAPI File()/Form() defaults
+[tool.ruff.lint.per-file-ignores]
+"src/qira_ocr/api.py" = ["B008"]  # FastAPI File()/Form() defaults

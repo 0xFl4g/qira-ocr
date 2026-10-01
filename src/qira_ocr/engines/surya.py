@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import logging
 import re
 
 from PIL import Image
@@ -8,6 +9,8 @@ from surya.inference import SuryaInferenceManager
 from surya.recognition import RecognitionPredictor
 
 from qira_ocr.result import BBox, Block, Line, OCRResult, Page, Word
+
+logger = logging.getLogger(__name__)
 
 _LINE_BREAK = re.compile(r"<br\s*/?>|</(?:p|div|li|tr|h[1-6])>", re.IGNORECASE)
 _CELL_END = re.compile(r"</t[dh]>", re.IGNORECASE)
@@ -39,8 +42,25 @@ class SuryaEngine:
             page = Page(blocks=[], width=image.width, height=image.height)
             return OCRResult(pages=[page])
 
+        block_preds = predictions[0].blocks
+        attempted = [b for b in block_preds if not b.skipped]
+        errors = sum(b.error for b in attempted)
+        # surya turns inference request failures into error=True blocks with no
+        # text; an all-error page means the backend is down, not an empty page.
+        if errors and errors == len(attempted):
+            raise RuntimeError(
+                f"surya inference failed for all {errors} block(s); "
+                "check llama-server/vllm or SURYA_INFERENCE_URL"
+            )
+        if errors:
+            logger.warning(
+                "surya inference failed for %d of %d block(s); their text is missing",
+                errors,
+                len(attempted),
+            )
+
         blocks: list[Block] = []
-        for block_pred in predictions[0].blocks:
+        for block_pred in block_preds:
             texts = _html_to_lines(block_pred.html)
             if not texts:  # skipped visual blocks, failed calls, empty regions
                 continue

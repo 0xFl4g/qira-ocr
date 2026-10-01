@@ -1,9 +1,11 @@
+import pytest
 from PIL import Image
 
 from qira_ocr.structure import StructureAnalyzer, _html_table_to_markdown
 
 
 class TestStructureAnalyzer:
+    @pytest.mark.requires_ocr_server
     def test_analyze_returns_ocr_result(self, sample_image):
         analyzer = StructureAnalyzer()
         img = Image.open(sample_image)
@@ -12,6 +14,7 @@ class TestStructureAnalyzer:
 
         assert isinstance(result, OCRResult)
 
+    @pytest.mark.requires_ocr_server
     def test_analyze_empty_image(self):
         analyzer = StructureAnalyzer()
         img = Image.new("RGB", (100, 100), color="white")

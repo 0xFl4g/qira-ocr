@@ -1,4 +1,5 @@
 import fitz
+import pytest
 from PIL import Image
 
 from qira_ocr import OCR
@@ -6,17 +7,20 @@ from qira_ocr.result import OCRResult
 
 
 class TestOCRRead:
+    @pytest.mark.requires_ocr_server
     def test_read_image_file(self, sample_image):
         ocr = OCR()
         result = ocr.read(sample_image)
         assert isinstance(result, OCRResult)
 
+    @pytest.mark.requires_ocr_server
     def test_read_pil_image(self):
         img = Image.new("RGB", (200, 100), color="white")
         ocr = OCR()
         result = ocr.read(img)
         assert isinstance(result, OCRResult)
 
+    @pytest.mark.requires_ocr_server
     def test_read_with_engine_override(self, sample_image):
         ocr = OCR()
         result = ocr.read(sample_image, engine="paddle")
@@ -35,6 +39,7 @@ class TestOCRRead:
         assert isinstance(result, OCRResult)
         assert "PDF text content" in result.to_text()
 
+    @pytest.mark.requires_ocr_server
     def test_read_returns_exportable_result(self, sample_image):
         ocr = OCR()
         result = ocr.read(sample_image)
@@ -43,6 +48,7 @@ class TestOCRRead:
 
 
 class TestOCRFormats:
+    @pytest.mark.requires_ocr_server
     def test_all_formats(self, sample_image):
         ocr = OCR()
         result = ocr.read(sample_image)

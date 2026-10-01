@@ -95,6 +95,23 @@ When `engine="auto"` (default), qira-ocr inspects the document to pick the best 
 
 Override with `engine="paddle"`, `engine="surya"`, or `engine="qari"`.
 
+## Running the surya engine
+
+Surya (0.20+) runs OCR on a vision-language model served by an external inference server. On first use it starts the server itself and downloads the model (about 1.47 GB GGUF from `datalab-to/surya-ocr-2-gguf`). You need one of these:
+
+- **CPU / Apple Silicon:** the `llama-server` binary from llama.cpp (`brew install llama.cpp`, or a [release build](https://github.com/ggml-org/llama.cpp/releases) with `LLAMA_CPP_BINARY=/path/to/llama-server`)
+- **NVIDIA GPU:** vllm (Docker plus the NVIDIA Container Toolkit)
+
+To use a server that is already running, set `SURYA_INFERENCE_URL=http://host:port/v1`. Without a server, the surya engine raises an error with install hints. The auto route falls back to surya when Paddle confidence is low and QARI isn't installed.
+
+## Tests
+
+```bash
+uv sync --extra cli --extra api
+uv run pytest -m "not requires_ocr_server"  # what CI runs: no model downloads, no server
+uv run pytest                               # full suite: downloads Paddle/surya models, needs llama-server or vllm
+```
+
 ## License
 
 [MIT](LICENSE)

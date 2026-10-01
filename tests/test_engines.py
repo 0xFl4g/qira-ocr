@@ -1,5 +1,6 @@
 from typing import runtime_checkable
 
+import pytest
 from PIL import Image
 from surya.recognition.schema import BlockOCRResult, PageOCRResult
 
@@ -33,6 +34,7 @@ class TestPaddleEngine:
         engine = PaddleEngine()
         assert isinstance(engine, OCREngine)
 
+    @pytest.mark.requires_ocr_server
     def test_recognize_returns_ocr_result(self, sample_image):
         engine = PaddleEngine()
         img = Image.open(sample_image)
@@ -40,6 +42,7 @@ class TestPaddleEngine:
         assert isinstance(result, OCRResult)
         assert len(result.pages) == 1
 
+    @pytest.mark.requires_ocr_server
     def test_recognize_finds_text(self, sample_image):
         engine = PaddleEngine()
         img = Image.open(sample_image)
@@ -77,6 +80,7 @@ class TestSuryaEngine:
         assert block.bbox == BBox(1, 2, 30, 20)
         assert block.confidence == 0.9
 
+    @pytest.mark.requires_ocr_server
     def test_recognize_returns_ocr_result(self, sample_image):
         engine = SuryaEngine()
         img = Image.open(sample_image)
@@ -84,6 +88,7 @@ class TestSuryaEngine:
         assert isinstance(result, OCRResult)
         assert len(result.pages) == 1
 
+    @pytest.mark.requires_ocr_server
     def test_recognize_arabic(self, sample_arabic_image):
         engine = SuryaEngine()
         img = Image.open(sample_arabic_image)

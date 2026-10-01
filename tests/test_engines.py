@@ -1,6 +1,7 @@
 from typing import runtime_checkable
 
 from PIL import Image
+from surya.recognition.schema import BlockOCRResult, PageOCRResult
 
 from qira_ocr.engines.base import OCREngine
 from qira_ocr.engines.paddle import PaddleEngine
@@ -54,6 +55,27 @@ class TestSuryaEngine:
     def test_conforms_to_protocol(self):
         engine = SuryaEngine()
         assert isinstance(engine, OCREngine)
+
+    def test_recognize_maps_blocks(self):
+        text_block = BlockOCRResult(
+            polygon=[1, 2, 30, 20],
+            confidence=0.9,
+            label="Text",
+            reading_order=0,
+            html="<p>Hello &amp; <b>world</b><br>line two</p>",
+        )
+        picture = BlockOCRResult(
+            polygon=[0, 25, 50, 50], label="Picture", reading_order=1, skipped=True
+        )
+        engine = SuryaEngine()
+        engine._recognition_predictor = lambda images: [
+            PageOCRResult(blocks=[text_block, picture], image_bbox=[0, 0, 100, 50])
+        ]
+        result = engine.recognize(Image.new("RGB", (100, 50)))
+        assert result.to_text() == "Hello & world\nline two"
+        (block,) = result.pages[0].blocks
+        assert block.bbox == BBox(1, 2, 30, 20)
+        assert block.confidence == 0.9
 
     def test_recognize_returns_ocr_result(self, sample_image):
         engine = SuryaEngine()

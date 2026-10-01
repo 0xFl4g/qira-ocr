@@ -9,10 +9,10 @@ dependencies = [
     "paddleocr>=2.9",
     "paddlepaddle>=3.0",
     "paddlex[ocr]",
-    "surya-ocr>=0.8,<0.18",
+    "surya-ocr>=0.20",
     "pymupdf>=1.25",
     "Pillow>=11.0",
-    "transformers>=4.45,<5",
+    "transformers>=5",
 ]
 
 [project.optional-dependencies]

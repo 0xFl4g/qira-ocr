@@ -1,58 +1,56 @@
 from __future__ import annotations
 
+import html
+import re
+
 from PIL import Image
-from surya.common.surya.schema import TaskNames
-from surya.detection import DetectionPredictor
-from surya.recognition import FoundationPredictor, RecognitionPredictor
+from surya.inference import SuryaInferenceManager
+from surya.recognition import RecognitionPredictor
 
 from qira_ocr.result import BBox, Block, Line, OCRResult, Page, Word
+
+_LINE_BREAK = re.compile(r"<br\s*/?>|</(?:p|div|li|tr|h[1-6])>", re.IGNORECASE)
+_CELL_END = re.compile(r"</t[dh]>", re.IGNORECASE)
+_TAG = re.compile(r"<[^>]+>")
+
+
+def _html_to_lines(fragment: str) -> list[str]:
+    text = _CELL_END.sub(" ", _LINE_BREAK.sub("\n", fragment))
+    text = html.unescape(_TAG.sub("", text))
+    return [line.strip() for line in text.splitlines() if line.strip()]
 
 
 class SuryaEngine:
     def __init__(self, langs: list[str] | None = None) -> None:
         self._langs = langs or ["ar", "en"]
         self._recognition_predictor: RecognitionPredictor | None = None
-        self._detection_predictor: DetectionPredictor | None = None
 
-    def _get_predictors(self) -> tuple[RecognitionPredictor, DetectionPredictor]:
+    def _get_predictor(self) -> RecognitionPredictor:
+        # surya 0.20+ runs OCR on a VLM server (llama-server or vllm) that the
+        # inference manager spawns lazily on the first call.
         if self._recognition_predictor is None:
-            foundation_predictor = FoundationPredictor()
-            self._recognition_predictor = RecognitionPredictor(foundation_predictor)
-            self._detection_predictor = DetectionPredictor()
-        return self._recognition_predictor, self._detection_predictor
+            self._recognition_predictor = RecognitionPredictor(SuryaInferenceManager())
+        return self._recognition_predictor
 
     def recognize(self, image: Image.Image) -> OCRResult:
-        recognition_predictor, detection_predictor = self._get_predictors()
-
-        predictions = recognition_predictor(
-            [image],
-            task_names=[TaskNames.ocr_without_boxes],
-            det_predictor=detection_predictor,
-        )
+        predictions = self._get_predictor()([image])
 
         if not predictions:
             page = Page(blocks=[], width=image.width, height=image.height)
             return OCRResult(pages=[page])
 
-        page_pred = predictions[0]
         blocks: list[Block] = []
-
-        for text_line in page_pred.text_lines:
-            poly = text_line.polygon
-            x_coords = [p[0] for p in poly]
-            y_coords = [p[1] for p in poly]
-            bbox = BBox(
-                x1=min(x_coords),
-                y1=min(y_coords),
-                x2=max(x_coords),
-                y2=max(y_coords),
-            )
-
-            conf = text_line.confidence if text_line.confidence is not None else 0.0
-            word = Word(text=text_line.text, bbox=bbox, confidence=conf)
-            line = Line(words=[word], bbox=bbox)
-            block = Block(lines=[line], bbox=bbox)
-            blocks.append(block)
+        for block_pred in predictions[0].blocks:
+            texts = _html_to_lines(block_pred.html)
+            if not texts:  # skipped visual blocks, failed calls, empty regions
+                continue
+            bbox = BBox(*block_pred.bbox)
+            conf = block_pred.confidence if block_pred.confidence is not None else 0.0
+            lines = [
+                Line(words=[Word(text=text, bbox=bbox, confidence=conf)], bbox=bbox)
+                for text in texts
+            ]
+            blocks.append(Block(lines=lines, bbox=bbox))
 
         page = Page(blocks=blocks, width=image.width, height=image.height)
         return OCRResult(pages=[page])

@@ -99,6 +99,20 @@ class TestSuryaEngine:
         with pytest.raises(RuntimeError):
             engine.recognize(Image.new("RGB", (100, 50)))
 
+    def test_recognize_returns_empty_when_all_blocks_skipped(self):
+        pictures = [
+            BlockOCRResult(
+                polygon=[0, 0, 50, 20], label="Picture", reading_order=0, skipped=True
+            ),
+            BlockOCRResult(
+                polygon=[0, 25, 50, 50], label="Picture", reading_order=1, skipped=True
+            ),
+        ]
+        engine = self._engine_returning(*pictures)
+        result = engine.recognize(Image.new("RGB", (100, 50)))
+        assert result.to_text() == ""
+        assert result.pages[0].blocks == []
+
     def test_recognize_warns_on_partial_errors(self, caplog):
         ok = BlockOCRResult(
             polygon=[0, 0, 50, 20], label="Text", reading_order=0, html="<p>kept</p>"

@@ -104,6 +104,8 @@ Surya (0.20+) runs OCR on a vision-language model served by an external inferenc
 
 To use a server that is already running, set `SURYA_INFERENCE_URL=http://host:port/v1`. Without a server, the surya engine raises an error with install hints. The auto route falls back to surya when Paddle confidence is low and QARI isn't installed.
 
+If surya fails on every block it attempted on a page (the backend is down or unreachable), `recognize` raises `RuntimeError` instead of returning an empty page. This is deliberate and aborts a multi-page document; partial failures only log a warning and the failed blocks' text is missing.
+
 Surya bounding boxes are per layout block (a paragraph, table, header, and so on), not per text line: every line in a surya block shares that block's bbox and confidence.
 
 ## Tests
